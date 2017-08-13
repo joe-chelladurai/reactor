@@ -7,7 +7,7 @@
 \alias{reactor_core}
 \title{Reactor - a lite-GUI for R based in Shiny}
 \usage{
-reactorUI(namespace, layout = "vertical")
+reactorUI(namespace, layout = c("vertical", "horizontal"))
 
 reactorModule(namespace = NULL, directory = NULL, envir = NULL)
 

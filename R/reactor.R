@@ -94,9 +94,17 @@ NULL
 # The UI module
 #' @rdname reactor
 #' @export
-reactorUI <- function(namespace, layout = 'vertical') {
+reactorUI <- function(namespace, layout = c('vertical', 'horizontal')) {
   library(shiny)
+  tryCatch(
+    namespace <- as.character(namespace[1]),
+    error = function(e){
+      stop(message(e))
+    }
+  )
   ns<-NS(namespace)
+
+  layout <- match.arg(layout, c('vertical', 'horizontal'))
 
   # from user selection... extensible via the switch if more layouts added
   ui <- switch(layout,
@@ -114,8 +122,15 @@ reactorUI <- function(namespace, layout = 'vertical') {
 #' @rdname reactor
 #' @export
 reactorModule <- function(namespace = NULL, directory = NULL, envir = NULL) {
-  if(is.null(envir)) envir_ <- parent.frame()
+  if(is.null(envir) | !class(envir)=='environment') envir_ <- parent.frame()
   else envir_ <- envir
+
+  tryCatch(
+    namespace <- as.character(namespace[1]),
+    error = function(e){
+      stop(message(e))
+    }
+  )
 
   r<-do.call(callModule,
           args = list(module = reactor, id = namespace,
