@@ -34,6 +34,6 @@ reactorModule('faithful')
 
 ### Try *reactor*
 ```S
-reactor_core()
+reactorCore()
 ```
 

@@ -14,7 +14,7 @@ globalVariables(".rs.restartR")
 #'
 #'  \item{reactorModule()}{Load the reactor server module}
 #'
-#'  \item{reactor_core()}{A small Shiny app to demonstrate \emph{reactor}}
+#'  \item{reactorCore()}{A small Shiny app to demonstrate \emph{reactor}}
 #'
 #' }
 #' @param namespace \emph{character string} Standard namespace convention for Shiny modules.This value
@@ -211,7 +211,7 @@ reactor <- function(input, output, session,
         tryCatch(
           {
             rValues$out <- rmarkdown::render(input = tmp,
-                                  output_format = html_document(),
+                                  output_format = html_fragment(),
                                   output_file = sub('.Rmd', '.html', tmp),
                                   envir = environment_(),
                                   runtime = 'shiny')
@@ -351,7 +351,7 @@ reactor <- function(input, output, session,
 # A small app to demonstrate reactor
 #' @rdname reactor
 #' @export
-reactor_core <- function() {
+reactorCore <- function() {
   library(shiny)
   runApp(system.file('R/app.R', package = 'reactor'))
 }

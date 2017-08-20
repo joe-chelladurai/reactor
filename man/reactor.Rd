@@ -4,14 +4,14 @@
 \alias{reactor}
 \alias{reactorUI}
 \alias{reactorModule}
-\alias{reactor_core}
+\alias{reactorCore}
 \title{Reactor - a lite-GUI for R based in Shiny}
 \usage{
 reactorUI(namespace, layout = c("vertical", "horizontal"))
 
 reactorModule(namespace = NULL, directory = NULL, envir = NULL)
 
-reactor_core()
+reactorCore()
 }
 \arguments{
 \item{namespace}{\emph{character string} Standard namespace convention for Shiny modules.This value
@@ -48,7 +48,7 @@ code, save the code, and to generate reports in multiple formats.
 
  \item{reactorModule()}{Load the reactor server module}
 
- \item{reactor_core()}{A small Shiny app to demonstrate \emph{reactor}}
+ \item{reactorCore()}{A small Shiny app to demonstrate \emph{reactor}}
 
 }
 }
