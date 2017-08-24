@@ -166,6 +166,7 @@ reactor <- function(input, output, session,
         "\\reactor.reports")
     } else dir_ <- paste0(directory_(), "\\reactor.reports")
 
+    addResourcePath("reactor.reports", dir_)
     rValues$directory <- dir_
   })
 
@@ -211,10 +212,10 @@ reactor <- function(input, output, session,
         tryCatch(
           {
             rValues$out <- rmarkdown::render(input = tmp,
-                                  output_format = html_fragment(),
+                                  output_format = html_document(),
                                   output_file = sub('.Rmd', '.html', tmp),
                                   envir = environment_(),
-                                  runtime = 'shiny')
+                                  runtime = 'static')
           },
           # instead of having the whole application crash on error, this will pop a modal dialog with
           # the error, and then halt execution
@@ -238,7 +239,13 @@ reactor <- function(input, output, session,
 
   output$out <- renderUI({
     req(input$run > 0, !is.null(rValues$out))
-    includeHTML(rValues$out)
+    # includeHTML(rValues$out)
+    tags$iframe(
+          src = "reactor.reports/.last.reactor.report.html",
+          width = '100%', height = '100%',
+          frameborder = 0,
+          scrolling = 'auto',
+          seamless = TRUE)
   })
 
   # similar to the stuff above, but done in a way to save the script
