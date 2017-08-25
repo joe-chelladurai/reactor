@@ -38,8 +38,8 @@ vert.tags <- function(ns){
                                   width = '150px')
             ))
         ),
-        mainPanel(
-         htmlOutput(ns('out'))
+        mainPanel(width = 6,
+         htmlOutput(ns('out'), height = "100vh")
         )
       )
     )
@@ -91,7 +91,7 @@ horz.tags <- function(ns){
         )
       ),
       fluidRow(
-        column(12, htmlOutput(ns('out')))
+        column(12, htmlOutput(ns('out'), height = "100vh"))
       )
     )
   )
