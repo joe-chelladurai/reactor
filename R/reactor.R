@@ -209,14 +209,15 @@ reactor <- function(input, output, session,
         writeLines(rValues$rmd, tmp)
 
       incProgress(.3, detail = 'Generating report')
+
         tryCatch(
           {
-            out_width <- paste0("output_", session$ns("out"), "_width")
+            width_ <- paste0("output_", session$ns("out"), "_width")
             rValues$out <- rmarkdown::render(input = tmp,
                                   output_format = html_document(),
                                   output_file = sub('.Rmd', '.html', tmp),
                                   output_options = list(
-                                    out.width = session$clientData[[out_width]]
+                                    out.width = session$clientData[[width_]]
                                   ),
                                   envir = environment_(),
                                   runtime = 'shiny')
@@ -242,17 +243,15 @@ reactor <- function(input, output, session,
   })
 
   output$out <- renderUI({
-    if(is.null(rValues$out)) return(NULL)
-    width_ <- paste0("output_", session$ns("out"), "_width")
-    height_ <- paste0("output_", session$ns("out"), "_height")
-
+    req(input$run > 0, !is.null(rValues$out))
     tags$iframe(
-          src = "reactor.reports/.last.reactor.report.html",
-          width = "100%",
-          height = "100%",
+          src = 'reactor.reports/.last.reactor.report.html',
+          width = '100%',
+          height = '100%',
           frameborder = 0,
           scrolling = 'auto')
   })
+
 
   # similar to the stuff above, but done in a way to save the script
   observeEvent(input$saveScript, {

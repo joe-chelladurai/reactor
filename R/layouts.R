@@ -11,7 +11,7 @@ vert.tags <- function(ns){
                                   'File Type:', choices = c('R', 'Rmd')))
             ),
             textAreaInput(ns('script'), label = 'Script:',
-                          height = '500px', resize = 'vertical'),
+                          height = '400px', resize = 'vertical'),
             fluidRow(column(3,
                 actionButton(ns('run'), 'Run', width = '150px'))),
             hr(),
@@ -38,8 +38,8 @@ vert.tags <- function(ns){
                                   width = '150px')
             ))
         ),
-        mainPanel(width = 6,
-         htmlOutput(ns('out'), height = "100vh")
+        reactorMainPanel(width = 6, height = "100vh",
+         reactorOutput(ns('out'), height = '100vh')
         )
       )
     )
@@ -60,7 +60,7 @@ horz.tags <- function(ns){
                                   'File Type:', choices = c('R', 'Rmd')))
             ),
             textAreaInput(ns('script'), label = 'Script:',
-                          height = '500px', resize = 'vertical'),
+                          height = '400px', resize = 'vertical'),
             fluidRow(
               column(3, actionButton(ns('run'), 'Run', width = '150px'))
             ),
@@ -91,7 +91,7 @@ horz.tags <- function(ns){
         )
       ),
       fluidRow(
-        column(12, htmlOutput(ns('out'), height = "100vh"))
+        column(12, reactorOutput(ns('out'), height = '100vh'))
       )
     )
   )
