@@ -23,7 +23,9 @@ UI objects in your application.}
 be useful in fitting \emph{reactor} to different UI layouts in Shiny applications.}
 
 \item{directory}{\emph{character string} The directory where \emph{reactor} should save reports.  Default \code{NULL}
-which will have \emph{reactor} generate a folder in the user's \emph{Documents} directory.}
+which will have \emph{reactor} generate a folder in the user's \emph{Documents} directory. If write permissions do not allow
+for creation of a folder, \emph{reactor} will attempt to create a temporary folder. If that should fail, the user will be prompted
+to manually create a folder and then relaunch the app. Value passed can be a reactive expression or a static value}
 
 \item{envir}{\emph{For advanced users} The environment where R scripts and reports should be evaluated.
 Defaults to the primary server environment of the Shiny session, providing access to all session objects.

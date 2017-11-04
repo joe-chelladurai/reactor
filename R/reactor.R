@@ -24,7 +24,9 @@ globalVariables(".rs.restartR")
 #' \code{vertical} or \code{horizontal}.  Default \code{vertical}.  Adjusting the split should
 #' be useful in fitting \emph{reactor} to different UI layouts in Shiny applications.
 #' @param directory \emph{character string} The directory where \emph{reactor} should save reports.  Default \code{NULL}
-#' which will have \emph{reactor} generate a folder in the user's \emph{Documents} directory.
+#' which will have \emph{reactor} generate a folder in the user's \emph{Documents} directory. If write permissions do not allow
+#' for creation of a folder, \emph{reactor} will attempt to create a temporary folder. If that should fail, the user will be prompted
+#' to manually create a folder and then relaunch the app. Value passed can be a reactive expression or a static value
 #' @param envir \emph{For advanced users} The environment where R scripts and reports should be evaluated.
 #' Defaults to the primary server environment of the Shiny session, providing access to all session objects.
 #' Other common options would be the current calling environment, \code{environment()} or the global environment
@@ -152,7 +154,10 @@ reactor <- function(input, output, session,
 
   # making the directory reactive, so it can be changed from the main shiny interface... say
   # through an actionButton call to choose.dir
-  directory_ <- reactive({ directory })
+  directory_ <- reactive({
+    if(is.reactive(directory)) return(directory())
+    return(directory)
+  })
 
   # We make the environment variable reactive to allow for the scope to change
   # or re-evaluate via user input or some other method
@@ -166,6 +171,36 @@ reactor <- function(input, output, session,
         "\\reactor.reports")
     } else dir_ <- paste0(directory_(), "\\reactor.reports")
 
+    dir.create(dir_, showWarnings = FALSE)
+    rValues$permissions <- TRUE
+
+    # we'll check to see if we have permissions to create the dir
+    # if not, we'll create a tmp dir and use that
+    if(!dir.exists(dir_)) {
+      # temporarily switch to the temp dir, in case you do not have write
+      # permission to the current working directory
+      dir_ <- paste0(tempdir(), "\\reactor.reports")
+      oldWd <- setwd( dir_ )
+
+      dir.create(dir_, showWarnings = FALSE)
+
+      # if we can't even create a temp dir, then we send a message asking the
+      # user to manually create a directory and restart
+      if(!dir.exists(dir_)) {
+        showModal(modalDialog(
+          title = 'PERMISSIONS ERROR!',
+          'Having difficulty creating a directory. Please manually create
+          Documents\reactor.reports under your user profile and then relaunch.',
+          easyClose = TRUE,
+          footer = modalButton("Ok")
+        ))
+        rValues$permissions <- FALSE
+      }
+
+      on.exit( setwd(oldWd) )
+    }
+
+    # add the directory to the resource path so the browser can access
     addResourcePath("reactor.reports", dir_)
     rValues$directory <- dir_
   })
@@ -191,7 +226,8 @@ reactor <- function(input, output, session,
   })
 
   observeEvent(input$run, {
-    dir.create(rValues$directory, showWarnings = FALSE)
+    req(rValues$permissions)
+
     # establishing a temperory file to accept the script as .Rmd, which makes
     # it easy to render into html for inclusion.  Rendering this way helps to include
     # both static and interactive plots and objects
@@ -217,7 +253,7 @@ reactor <- function(input, output, session,
                                   output_format = html_document(),
                                   output_file = sub('.Rmd', '.html', tmp),
                                   output_options = list(
-                                    out.width = session$clientData[[width_]]
+                                    out.width = "90%"
                                   ),
                                   envir = environment_(),
                                   runtime = 'shiny')
@@ -255,7 +291,8 @@ reactor <- function(input, output, session,
 
   # similar to the stuff above, but done in a way to save the script
   observeEvent(input$saveScript, {
-      dir.create(rValues$directory, showWarnings = FALSE)
+      req(rValues$permissions)
+
       file <- paste0(input$scriptName, input$scriptExt)
       file <- paste0(rValues$directory, "\\", file)
       file.create(file)
@@ -286,7 +323,8 @@ reactor <- function(input, output, session,
 
   # similar to the stuff above, but done in a way to save the report
   observeEvent(input$downloadReport, {
-      dir.create(rValues$directory, showWarnings = FALSE)
+      req(rValues$permissions)
+
       # set up a temporary file to accept the rendered script
       tmp <- paste0(rValues$directory, "\\.last.reactor.report.Rmd")
       file.create(tmp)
