@@ -1,8 +1,8 @@
 Package: reactor
 Type: Package
 Title: A lite-GUI for R based in Shiny
-Version: 0.5.0
-Date: 2017-08-10
+Version: 0.9.0
+Date: 2018-08-04
 Author: Kent Laukhuf <laukhuf@gmail.com>
 Maintainer: Kent Laukhuf <laukhuf@gmail.com>
 Description: reactor provides a lite-GUI coded as a Shiny module and able to be 
@@ -10,7 +10,13 @@ Description: reactor provides a lite-GUI coded as a Shiny module and able to be
     based on reactive values inside your Shiny application, without needing to engage normal
     Shiny-debugging methods. Reactor can also be used to debug portions of the Shiny application
     without the risk of crashing the application.
-License: MIT
+URL: https://github.com/klaukh/reactor
+BugReports: https://github.com/klaukh/reactor/issues 
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+Depends:
+  knitr,
+  rmarkdown,
+  shiny

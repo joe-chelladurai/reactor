@@ -46,64 +46,64 @@ code, save the code, and to generate reports in multiple formats.
 
 \describe{
 
- \item{reactorUI()}{The UI component, with variuos layout options}
-
+ \item{reactorUI()}{The UI component, with various layout options}
  \item{reactorModule()}{Load the reactor server module}
-
  \item{reactorCore()}{A small Shiny app to demonstrate \emph{reactor}}
 
 }
 }
 
 \examples{
+\dontrun{
+  # View the code from the example app
+  # file.show(system.file('example/app.R', package = 'reactor'))
 
-## DO NOT RUN
-library(shiny)
-library(reactor)
+ library(reactor)
 
-# Define UI for application that draws a histogram
-ui <- navbarPage(title = 'Reactor Test',
-          tabPanel('Old Faithful',
-             # Application title
-             # Sidebar with a slider input for number of bins
-             sidebarLayout(
-                sidebarPanel(
-                   sliderInput("bins",
-                               "Number of bins:",
-                               min = 1,
-                               max = 50,
-                               value = 30)
-                ),
-                # Show a plot of the generated distribution
-                mainPanel(
-                   titlePanel("Old Faithful Geyser Data"),
-                   plotOutput("distPlot")
-                )
-             )
-          ),
-          tabPanel('Reactor', reactorUI('test'))
-)
+ # Define UI for application that draws a histogram
+ ui <- navbarPage(title = 'Reactor Test',
+           tabPanel('Old Faithful',
+              # Application title
+              # Sidebar with a slider input for number of bins
+              sidebarLayout(
+                 sidebarPanel(
+                    sliderInput("bins",
+                                "Number of bins:",
+                                min = 1,
+                                max = 50,
+                                value = 30)
+                 ),
+                 # Show a plot of the generated distribution
+                 mainPanel(
+                    titlePanel("Old Faithful Geyser Data"),
+                    plotOutput("distPlot")
+                 )
+              )
+           ),
+           tabPanel('Reactor', reactorUI('faithful'))
+ )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+ # Define server logic required to draw a histogram
+ server <- function(input, output) {
 
-   data <- reactive({ faithful })
+    data <- reactive({ faithful })
 
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- data()[, 2]
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    output$distPlot <- renderPlot({
+       # generate bins based on input$bins from ui.R
+       x    <- data()[, 2]
+       bins <- seq(min(x), max(x), length.out = input$bins + 1)
 
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+       # draw the histogram with the specified number of bins
+       hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    })
 
-   # need to pass in some data to avoid error of
-   # reading objects from shinyoutput object not allowed
-   r <- callModule(reactor, 'test')
+    # add the reactor module
+    r <- reactorModule('faithful')
+ }
+
+ # Run the application
+ shinyApp(ui = ui, server = server)
+
 }
-
-# Run the application
-shinyApp(ui = ui, server = server)
 
 }

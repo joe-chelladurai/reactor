@@ -10,10 +10,8 @@ globalVariables(".rs.restartR")
 #' @section Functions:
 #' \describe{
 #'
-#'  \item{reactorUI()}{The UI component, with variuos layout options}
-#'
+#'  \item{reactorUI()}{The UI component, with various layout options}
 #'  \item{reactorModule()}{Load the reactor server module}
-#'
 #'  \item{reactorCore()}{A small Shiny app to demonstrate \emph{reactor}}
 #'
 #' }
@@ -39,55 +37,57 @@ globalVariables(".rs.restartR")
 #' @import knitr
 #' @import rmarkdown
 #' @examples
+#' \dontrun{
+#'   # View the code from the example app
+#'   # file.show(system.file('example/app.R', package = 'reactor'))
 #'
-#' ## DO NOT RUN
-#' library(shiny)
-#' library(reactor)
+#'  library(reactor)
 #'
-#' # Define UI for application that draws a histogram
-#' ui <- navbarPage(title = 'Reactor Test',
-#'           tabPanel('Old Faithful',
-#'              # Application title
-#'              # Sidebar with a slider input for number of bins
-#'              sidebarLayout(
-#'                 sidebarPanel(
-#'                    sliderInput("bins",
-#'                                "Number of bins:",
-#'                                min = 1,
-#'                                max = 50,
-#'                                value = 30)
-#'                 ),
-#'                 # Show a plot of the generated distribution
-#'                 mainPanel(
-#'                    titlePanel("Old Faithful Geyser Data"),
-#'                    plotOutput("distPlot")
-#'                 )
-#'              )
-#'           ),
-#'           tabPanel('Reactor', reactorUI('test'))
-#' )
+#'  # Define UI for application that draws a histogram
+#'  ui <- navbarPage(title = 'Reactor Test',
+#'            tabPanel('Old Faithful',
+#'               # Application title
+#'               # Sidebar with a slider input for number of bins
+#'               sidebarLayout(
+#'                  sidebarPanel(
+#'                     sliderInput("bins",
+#'                                 "Number of bins:",
+#'                                 min = 1,
+#'                                 max = 50,
+#'                                 value = 30)
+#'                  ),
+#'                  # Show a plot of the generated distribution
+#'                  mainPanel(
+#'                     titlePanel("Old Faithful Geyser Data"),
+#'                     plotOutput("distPlot")
+#'                  )
+#'               )
+#'            ),
+#'            tabPanel('Reactor', reactorUI('faithful'))
+#'  )
 #'
-#' # Define server logic required to draw a histogram
-#' server <- function(input, output) {
+#'  # Define server logic required to draw a histogram
+#'  server <- function(input, output) {
 #'
-#'    data <- reactive({ faithful })
+#'     data <- reactive({ faithful })
 #'
-#'    output$distPlot <- renderPlot({
-#'       # generate bins based on input$bins from ui.R
-#'       x    <- data()[, 2]
-#'       bins <- seq(min(x), max(x), length.out = input$bins + 1)
+#'     output$distPlot <- renderPlot({
+#'        # generate bins based on input$bins from ui.R
+#'        x    <- data()[, 2]
+#'        bins <- seq(min(x), max(x), length.out = input$bins + 1)
 #'
-#'       # draw the histogram with the specified number of bins
-#'       hist(x, breaks = bins, col = 'darkgray', border = 'white')
-#'    })
+#'        # draw the histogram with the specified number of bins
+#'        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+#'     })
 #'
-#'    # need to pass in some data to avoid error of
-#'    # reading objects from shinyoutput object not allowed
-#'    r <- callModule(reactor, 'test')
+#'     # add the reactor module
+#'     r <- reactorModule('faithful')
+#'  }
+#'
+#'  # Run the application
+#'  shinyApp(ui = ui, server = server)
+#'
 #' }
-#'
-#' # Run the application
-#' shinyApp(ui = ui, server = server)
 #'
 #' @name reactor
 NULL
@@ -97,7 +97,6 @@ NULL
 #' @rdname reactor
 #' @export
 reactorUI <- function(namespace, layout = c('vertical', 'horizontal')) {
-  library(shiny)
   tryCatch(
     namespace <- as.character(namespace[1]),
     error = function(e){
@@ -124,7 +123,7 @@ reactorUI <- function(namespace, layout = c('vertical', 'horizontal')) {
 #' @rdname reactor
 #' @export
 reactorModule <- function(namespace = NULL, directory = NULL, envir = NULL) {
-  if(is.null(envir) | !class(envir)=='environment') envir_ <- parent.frame()
+  if (is.null(envir) | !class(envir)=='environment') envir_ <- parent.frame()
   else envir_ <- envir
 
   tryCatch(
@@ -155,7 +154,7 @@ reactor <- function(input, output, session,
   # making the directory reactive, so it can be changed from the main shiny interface... say
   # through an actionButton call to choose.dir
   directory_ <- reactive({
-    if(is.reactive(directory)) return(directory())
+    if (is.reactive(directory)) return(directory())
     return(directory)
   })
 
@@ -165,28 +164,28 @@ reactor <- function(input, output, session,
 
   # processes the reactive directory_
   observe({
-    if(is.null( directory_() )) {
+    if (is.null( directory_() )) {
       dir_ <- paste0(
         file.path(Sys.getenv("USERPROFILE"),"Documents"),
         "\\reactor.reports")
-    } else dir_ <- paste0(directory_(), "\\reactor.reports")
+    } else dir_ <- normalizePath(paste0(directory_(), "\\reactor.reports"))
 
     dir.create(dir_, showWarnings = FALSE)
     rValues$permissions <- TRUE
 
     # we'll check to see if we have permissions to create the dir
     # if not, we'll create a tmp dir and use that
-    if(!dir.exists(dir_)) {
+    if (!dir.exists(dir_)) {
       # temporarily switch to the temp dir, in case you do not have write
       # permission to the current working directory
-      dir_ <- paste0(tempdir(), "\\reactor.reports")
+      dir_ <- normalizePath(paste0(tempdir(), "\\reactor.reports"))
       oldWd <- setwd( dir_ )
 
       dir.create(dir_, showWarnings = FALSE)
 
       # if we can't even create a temp dir, then we send a message asking the
       # user to manually create a directory and restart
-      if(!dir.exists(dir_)) {
+      if (!dir.exists(dir_)) {
         showModal(modalDialog(
           title = 'PERMISSIONS ERROR!',
           'Having difficulty creating a directory. Please manually create
@@ -208,7 +207,7 @@ reactor <- function(input, output, session,
   # for handling the import of files... automatically detects the extension
   observeEvent(input$file, {
     isolate({
-      rValues$file <- input$file$datapath
+      rValues$file <- normalizePath(input$file$datapath)
       script_ <- paste0(readLines( rValues$file ), sep = '', collapse = '\n')
 
       updateTextAreaInput(session, 'script', value = script_)
@@ -248,7 +247,6 @@ reactor <- function(input, output, session,
 
         tryCatch(
           {
-            width_ <- paste0("output_", session$ns("out"), "_width")
             rValues$out <- rmarkdown::render(input = tmp,
                                   output_format = html_document(),
                                   output_file = sub('.Rmd', '.html', tmp),
@@ -294,17 +292,17 @@ reactor <- function(input, output, session,
       req(rValues$permissions)
 
       file <- paste0(input$scriptName, input$scriptExt)
-      file <- paste0(rValues$directory, "\\", file)
+      file <- normalizePath(paste0(rValues$directory, "\\", file))
       file.create(file)
 
-      if(input$scriptExt == '.R') {
+      if (input$scriptExt == '.R') {
         out <- switch(input$filetype,
                          R = input$script,
                          Rmd = {
                            rmdToScript(unlist(strsplit( input$script, "\n") ))
                          }
                         )
-      } else if(input$scriptExt == '.Rmd') {
+      } else if (input$scriptExt == '.Rmd') {
         out <- switch(input$filetype,
                          R = knitr::spin(knit = FALSE,
                                 text = unlist(strsplit( input$script, split = "\n") )),
@@ -326,7 +324,7 @@ reactor <- function(input, output, session,
       req(rValues$permissions)
 
       # set up a temporary file to accept the rendered script
-      tmp <- paste0(rValues$directory, "\\.last.reactor.report.Rmd")
+      tmp <- normalizePath(paste0(rValues$directory, "\\.last.reactor.report.Rmd"))
       file.create(tmp)
       file <- paste(input$reportname, sep = '.',
                     switch(input$format,
@@ -334,7 +332,7 @@ reactor <- function(input, output, session,
                            HTML = 'html',
                            Word = 'docx'))
 
-      file <- paste0(rValues$directory, "\\", file)
+      file <- normalizePath(paste0(rValues$directory, "\\", file))
 
       # when we hit the download button, we'll see if the user has already hit the "run" button,
       # which populates the rValues$rmd var. downloadReport will save the rendered report if there,
@@ -345,7 +343,7 @@ reactor <- function(input, output, session,
         incProgress(.3, detail = 'Translating to markdown')
 
           # if no script yet ran, then do that here
-          if(is.null(rmd)) {
+          if (is.null(rmd)) {
             rmd <- switch(input$filetype,
                             "R" = spin(text = unlist(
                                           strsplit( input$script, split = "\n")),
@@ -357,8 +355,6 @@ reactor <- function(input, output, session,
       incProgress(.3, detail = 'Generating report')
         tryCatch(
             {
-              library(knitr)
-              library(rmarkdown)
               rmarkdown::render(input = tmp,
                      output_format = switch(
                           input$format,
@@ -399,11 +395,11 @@ reactor <- function(input, output, session,
 }
 
 # A small app to demonstrate reactor
+#
 #' @rdname reactor
 #' @export
 reactorCore <- function() {
-  library(shiny)
-  runApp(system.file('R/app.R', package = 'reactor'))
+  runApp(system.file('example/app.R', package = 'reactor'))
 }
 
 
